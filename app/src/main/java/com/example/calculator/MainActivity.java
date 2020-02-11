@@ -11,9 +11,12 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +35,41 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        TextView t = (TextView) findViewById(R.id.outputView);
-        t.setText(String.valueOf(0));
+        TextView output = (TextView) findViewById(R.id.outputView);
+        output.setText(String.valueOf(0));
+
+    }
+
+    public void buttonClick(View v) {
+
+        String s = "";
+        String buttonText = ((Button) v).getText().toString();
+        TextView output = (TextView) findViewById(R.id.outputView);
+
+        switch(buttonText) {
+
+            case "7":
+                s += "7";
+                break;
+
+            case "8":
+                s += "8";
+                break;
+
+            case "9":
+                s += "9";
+                break;
+
+            case "√":
+                s += "√";
+                break;
+
+            default:
+                s += "0";
+                break;
+        }
+
+        output.setText(s);
 
     }
 

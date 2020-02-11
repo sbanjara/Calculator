@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Calculator</string>
     <string name="action_settings">Settings</string>
-    <string name="textview">0</string>
+    <string name="textview"></string>
     <string name="btn7">7</string>
     <string name="btn8">8</string>
     <string name="btnSqrt">√</string>
