@@ -14,13 +14,19 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
 	private String s;
 	private int index;
+	private int indexTwo;
 	private BigDecimal lhs;
 	private BigDecimal rhs;
+	private BigDecimal intermediate;
 	private TextView output;
+	private String operator;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +47,11 @@ public class MainActivity extends AppCompatActivity {
 		
 		s = "";
 		index = 0;
+		indexTwo = 0;
+		operator = "";
 		lhs = new BigDecimal("0");
 		rhs = new BigDecimal("0");
+		intermediate = new BigDecimal("0");
         output = (TextView) findViewById(R.id.outputView);
         output.setText(String.valueOf(0));
 
@@ -84,16 +93,14 @@ public class MainActivity extends AppCompatActivity {
                 s += "6";
                 break;
 
-            case "\u00F7":
-                s += "\u00F7";
-				index = s.indexOf("\u00F7");
-				lhs = new BigDecimal(s.substring(0, index));
+            case "÷":
+                s += "÷";
+				operator += "÷";
                 break;
 				
 			case "%":
 				s = "%";
-				index = s.indexOf("%");
-				lhs = new BigDecimal(s.substring(0, index));
+                operator += "%";
 				break;
 				
 			case "1":
@@ -108,16 +115,14 @@ public class MainActivity extends AppCompatActivity {
                 s += "3";
                 break;
 
-            case "\u00D7":
-                s += "\u00D7";
-				index = s.indexOf("\u00D7");
-				lhs = new BigDecimal(s.substring(0, index));
+            case "×":
+                s += "×";
+                operator += "×";
                 break;
 				
 			case "-":
-				s = "-";
-				index = s.indexOf("-");
-				lhs = new BigDecimal(s.substring(0, index));
+				s += "-";
+                operator += "-";
 				break;
 				
 			case "\u00B1":
@@ -125,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
 				
 			case "0":
-				s = "0";
+				s += "0";
 				break;
 
             case ".":
@@ -134,20 +139,61 @@ public class MainActivity extends AppCompatActivity {
 
             case "+":
                 s += "+";
-				index = s.indexOf("+");
-				lhs = new BigDecimal(s.substring(0, index));
+                operator += "+";
                 break;
 
             case "=":
-                s += "=";
-				index = s.indexOf("+");
-				lhs = new BigDecimal(s.substring(0, index));
+                operator += "=";
                 break;
 
             default:
-                s = "0";
+                s = "";
                 break;
 				
+        }
+
+        if(operator.length() == 1) {
+            lhs = new BigDecimal( s.substring(0, s.length() - 1) );
+        }
+
+        if(operator.length() > 2) {
+
+            indexTwo = s.length();
+            String ran = s.substring( index + 1, indexTwo );
+            rhs = new BigDecimal(ran);
+
+            switch(operator.substring(0,1)) {
+
+                case "+":
+                    intermediate = lhs.add(rhs);
+                    break;
+
+                case "-":
+                    intermediate = lhs.subtract(rhs);
+                    break;
+
+                case "÷":  //Division
+                    intermediate = lhs.divide(rhs);
+                    break;
+
+                case "×": //Multiplication
+                    intermediate = lhs.multiply(rhs);
+                    break;
+
+                case "=":
+                    s = lhs.toString();
+                    break;
+
+            }
+
+            if(operator.substring(1,2).equals("=")) {
+                s = intermediate.toString();
+                operator = "";
+            }
+            else {
+                lhs = intermediate;
+            }
+
         }
 
         output.setText(s);
