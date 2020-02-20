@@ -22,11 +22,12 @@ public class MainActivity extends AppCompatActivity {
 	private String s;
 	private int index;
 	private int indexTwo;
+    private int counter;
 	private BigDecimal lhs;
 	private BigDecimal rhs;
 	private BigDecimal intermediate;
 	private TextView output;
-	private String operator;
+	private ArrayList operator;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
 		s = "";
 		index = 0;
 		indexTwo = 0;
-		operator = "";
+        counter = 0;
+		operator = new ArrayList<>();
 		lhs = new BigDecimal("0");
 		rhs = new BigDecimal("0");
 		intermediate = new BigDecimal("0");
@@ -79,6 +81,9 @@ public class MainActivity extends AppCompatActivity {
                 s += "√";
 				index = s.indexOf("√");
 				lhs = new BigDecimal(s.substring(0, index));
+                int number = Integer.parseInt(lhs.toString());
+                int sqrroot = (int) Math.pow(number, 0.5);
+                s = String.valueOf(sqrroot);
                 break;
 				
 			case "4":
@@ -95,12 +100,12 @@ public class MainActivity extends AppCompatActivity {
 
             case "÷":
                 s += "÷";
-				operator += "÷";
+				operator.add("÷");
                 break;
 				
 			case "%":
 				s = "%";
-                operator += "%";
+                operator.add("%");
 				break;
 				
 			case "1":
@@ -117,12 +122,12 @@ public class MainActivity extends AppCompatActivity {
 
             case "×":
                 s += "×";
-                operator += "×";
+                operator.add("×");
                 break;
 				
 			case "-":
 				s += "-";
-                operator += "-";
+                operator.add("-");
 				break;
 				
 			case "\u00B1":
@@ -139,30 +144,38 @@ public class MainActivity extends AppCompatActivity {
 
             case "+":
                 s += "+";
-                operator += "+";
+                operator.add("+");
                 break;
 
             case "=":
-                operator += "=";
+                operator.add("=");
                 break;
 
             default:
-                s = "";
+                s = "0";
                 break;
 				
         }
 
-        if(operator.length() == 1) {
-            lhs = new BigDecimal( s.substring(0, s.length() - 1) );
+        if( (operator.size() == 1) && ( (operator.get(i)).equals("=") ) ) {
+
+            index = s.indexOf( operator.get(0) );
+            lhs = new BigDecimal( s.substring(0, index) );
+            s = lhs.toString();
+            break;
+
         }
 
-        if(operator.length() > 2) {
+        else if( operator.length() == 2 ) {
 
+            index = s.indexOf( operator.get(0) );
+            lhs = new BigDecimal( s.substring(0, index) );
             indexTwo = s.length();
-            String ran = s.substring( index + 1, indexTwo );
-            rhs = new BigDecimal(ran);
+            rhs = new BigDecimal( s.substring( index + 1, indexTwo ) );
 
-            switch(operator.substring(0,1)) {
+            String operation = operator.get(1);
+
+            switch( operator.get(0) ) {
 
                 case "+":
                     intermediate = lhs.add(rhs);
@@ -180,18 +193,16 @@ public class MainActivity extends AppCompatActivity {
                     intermediate = lhs.multiply(rhs);
                     break;
 
-                case "=":
-                    s = lhs.toString();
-                    break;
-
             }
 
-            if(operator.substring(1,2).equals("=")) {
+            if( operation.equals("=") ) {
                 s = intermediate.toString();
-                operator = "";
+                operator.clear();
             }
+
             else {
-                lhs = intermediate;
+                String i = s.indexOf(operator.get(0), index+1);
+                s = s.replace(s.substring(0, i), intermediate);
             }
 
         }
