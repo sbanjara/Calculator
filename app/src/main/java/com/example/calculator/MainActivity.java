@@ -19,16 +19,15 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-	private String s;
-	private int index;
-	private int indexTwo;
-    private int counter;
-	private BigDecimal lhs;
-	private BigDecimal rhs;
-	private BigDecimal intermediate;
-	private TextView output;
-	private ArrayList operator;
-	
+    private String s;
+    private int index;
+    private int count;
+    private BigDecimal lhs;
+    private BigDecimal rhs;
+    private BigDecimal intermediate;
+    private TextView output;
+    private ArrayList<String> operator;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -45,15 +44,14 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-		
-		s = "";
-		index = 0;
-		indexTwo = 0;
-        counter = 0;
-		operator = new ArrayList<>();
-		lhs = new BigDecimal("0");
-		rhs = new BigDecimal("0");
-		intermediate = new BigDecimal("0");
+
+        s = "";
+        index = 0;
+        count = 0;
+        operator = new ArrayList<>();
+        lhs = new BigDecimal("0");
+        rhs = new BigDecimal("0");
+        intermediate = new BigDecimal("0");
         output = (TextView) findViewById(R.id.outputView);
         output.setText(String.valueOf(0));
 
@@ -63,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
         String buttonText = ((Button) v).getText().toString();
 
-        switch(buttonText) {
+        switch (buttonText) {
 
             case "7":
                 s += "7";
@@ -79,14 +77,14 @@ public class MainActivity extends AppCompatActivity {
 
             case "√":
                 s += "√";
-				index = s.indexOf("√");
-				lhs = new BigDecimal(s.substring(0, index));
+                index = s.indexOf("√");
+                lhs = new BigDecimal(s.substring(0, index));
                 int number = Integer.parseInt(lhs.toString());
-                int sqrroot = (int) Math.pow(number, 0.5);
+                Double sqrroot = Math.pow(number, 0.5);
                 s = String.valueOf(sqrroot);
                 break;
-				
-			case "4":
+
+            case "4":
                 s += "4";
                 break;
 
@@ -100,15 +98,15 @@ public class MainActivity extends AppCompatActivity {
 
             case "÷":
                 s += "÷";
-				operator.add("÷");
+                operator.add("÷");
                 break;
-				
-			case "%":
-				s = "%";
+
+            case "%":
+                s += "%";
                 operator.add("%");
-				break;
-				
-			case "1":
+                break;
+
+            case "1":
                 s += "1";
                 break;
 
@@ -124,19 +122,19 @@ public class MainActivity extends AppCompatActivity {
                 s += "×";
                 operator.add("×");
                 break;
-				
-			case "-":
-				s += "-";
+
+            case "-":
+                s += "-";
                 operator.add("-");
-				break;
-				
-			case "\u00B1":
-                s += "\u00B1";
                 break;
-				
-			case "0":
-				s += "0";
-				break;
+
+            case "\u00B1":
+                operator.add("\u00B1");
+                break;
+
+            case "0":
+                s += "0";
+                break;
 
             case ".":
                 s += ".";
@@ -152,30 +150,48 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             default:
-                s = "0";
+                count++;
                 break;
-				
-        }
-
-        if( (operator.size() == 1) && ( (operator.get(i)).equals("=") ) ) {
-
-            index = s.indexOf( operator.get(0) );
-            lhs = new BigDecimal( s.substring(0, index) );
-            s = lhs.toString();
-            break;
 
         }
 
-        else if( operator.length() == 2 ) {
 
-            index = s.indexOf( operator.get(0) );
-            lhs = new BigDecimal( s.substring(0, index) );
-            indexTwo = s.length();
-            rhs = new BigDecimal( s.substring( index + 1, indexTwo ) );
+        output.setText(s);
+
+
+        if(operator.size() > 0) {
+
+            if( ( operator.get(0).equals("=") ) ) {
+                operator.clear();
+            }
+
+            else if( ( operator.get(0).equals("\u00B1") ) ) {
+                lhs = new BigDecimal(s);
+                BigDecimal rhs = new BigDecimal("-1");
+                lhs = lhs.multiply(rhs);
+                s = lhs.toString();
+                output.setText(s);
+                operator.clear();
+            }
+
+        }
+
+        if (operator.size() == 2) {
+
+            index = s.indexOf(operator.get(0));
+            lhs = new BigDecimal(s.substring(0, index));
+            s = s.replace(s.substring(0, index + 1), "");
 
             String operation = operator.get(1);
 
-            switch( operator.get(0) ) {
+            if (operation.equals("=")) {
+                index = s.length();
+            } else {
+                index = s.indexOf(operation);
+            }
+            rhs = new BigDecimal(s.substring(0, index));
+
+            switch (operator.get(0)) {
 
                 case "+":
                     intermediate = lhs.add(rhs);
@@ -185,29 +201,37 @@ public class MainActivity extends AppCompatActivity {
                     intermediate = lhs.subtract(rhs);
                     break;
 
-                case "÷":  //Division
+                case "÷":
                     intermediate = lhs.divide(rhs);
                     break;
 
-                case "×": //Multiplication
+                case "×":
                     intermediate = lhs.multiply(rhs);
+                    break;
+
+                case "%":
+                    intermediate = lhs.remainder(rhs);
                     break;
 
             }
 
-            if( operation.equals("=") ) {
-                s = intermediate.toString();
-                operator.clear();
-            }
+            if (operation.equals("=")) {
 
+                s = intermediate.toString();
+                output.setText(s);
+                s = "";
+                operator.clear();
+
+            }
             else {
-                String i = s.indexOf(operator.get(0), index+1);
-                s = s.replace(s.substring(0, i), intermediate);
+
+                s = intermediate + operation;
+                output.setText(s);
+                operator.remove(0);
+
             }
 
         }
-
-        output.setText(s);
 
     }
 
