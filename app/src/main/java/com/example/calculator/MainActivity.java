@@ -27,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
 
     private int index;
     private int count;
+    private int sqrtCount;
+    private int decimalCount;
     private int restartCount;
 
     private BigDecimal lhs;
@@ -34,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     private BigDecimal intermediate;
 
     private TextView output;
-    //private ArrayList<String> operator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
 
         index = 0;
         count = 0;
+        sqrtCount = 0;
+        decimalCount = 0;
         restartCount = 0;
 
         lhs = new BigDecimal("0");
@@ -108,15 +111,20 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case "÷":
-                intermediate = lhs.divide(rhs, 3, RoundingMode.CEILING);
+                if( !(rhs.toString()).equals("0") ) {
+                    intermediate = lhs.divide(rhs, 3, RoundingMode.CEILING);
+                }
                 break;
+
 
             case "×":
                 intermediate = lhs.multiply(rhs);
                 break;
 
             case "%":
-                intermediate = lhs.remainder(rhs);
+                if( !(rhs.toString()).equals("0") ) {
+                    intermediate = lhs.remainder(rhs);
+                }
                 break;
 
         }
@@ -156,6 +164,55 @@ public class MainActivity extends AppCompatActivity {
         if ( (restartCount == 1) && (count == 0) ) {
             s = "";
             restartCount = 0;
+        }
+
+    }
+
+    public void clearSqrtString() {
+
+        if( (sqrtCount == 1) && (count == 0) ) {
+            s = "";
+            sqrtCount = 0;
+        }
+    }
+
+    public void addDecimal(String str) {
+
+        if( s.length() == 0 ) {
+            s += "0.";
+        }
+
+        else {
+
+            if (previousOperator.isEmpty() && decimalCount == 0) {
+
+                for (int i = 0; i < str.length(); ++i) {
+                    if (str.charAt(i) == '.') {
+                        decimalCount++;
+                    }
+                }
+
+            }
+
+            else if (!previousOperator.isEmpty() && decimalCount == 0) {
+
+                int lengthRight = s.length();
+                String right = s.substring(s.indexOf(previousOperator), lengthRight);
+
+                for (int i = 0; i < right.length(); ++i) {
+                    if (right.charAt(i) == '.') {
+                        decimalCount++;
+                    }
+                }
+
+            }
+
+            if (decimalCount < 1) {
+                s += ".";
+            }
+
+            decimalCount = 0;
+
         }
 
     }
@@ -215,29 +272,34 @@ public class MainActivity extends AppCompatActivity {
             case "=":
                 count++;
                 assignOperator("=");
-                //count = 0;
+                count = 0;
+                break;
+
+            case ".":
+                addDecimal(s);
                 break;
 
             default:
                 clearOldString();
+                clearSqrtString();
                 s += buttonText;
                 break;
 
         }
 
-        if ((s.length() >= 1) && !(previousOperator.isEmpty())) {
+        if ( (s.length() >= 1) && !(previousOperator.isEmpty()) ) {
 
             index = s.length();
 
             switch (previousOperator) {
 
                 case "=":
-                    sHold = "0";
                     break;
 
                 case "√":
                     String left = s.substring(0, index);
                     s = takeSqrt(left);
+                    sqrtCount = 1;
                     previousOperator = "";
                     count = 0;
                     break;
@@ -249,6 +311,17 @@ public class MainActivity extends AppCompatActivity {
                     count = 0;
                     break;
 
+                case "-":
+                    if(s.charAt(0) == '-') {
+                        index = s.indexOf(previousOperator, 1);
+                    }
+                    else {
+                        index = s.indexOf(previousOperator);
+                    }
+                    lhs = new BigDecimal(s.substring(0, index));
+                    break;
+
+
                 default:
                     index = s.indexOf(previousOperator);
                     lhs = new BigDecimal(s.substring(0, index));
@@ -258,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        if ((s.length() >= 2) && !(currentOperator.isEmpty())) {
+        if ( (s.length() >= 2) && !(currentOperator.isEmpty()) ) {
 
             index = s.indexOf(previousOperator);
             int length = s.length();
@@ -318,6 +391,12 @@ public class MainActivity extends AppCompatActivity {
                 switch (currentOperator) {
 
                     case "=":
+                        if(s.charAt(0) == '-') {
+                            index = s.indexOf(previousOperator, 1);
+                        }
+                        else {
+                            index = s.indexOf(previousOperator);
+                        }
                         rhs = new BigDecimal(s.substring(index + 1, length));
                         break;
 
@@ -345,7 +424,7 @@ public class MainActivity extends AppCompatActivity {
 
             calculate();
 
-            switch(currentOperator) {
+            switch ( currentOperator ) {
 
                 case "=":
                     s = intermediate.toString();
