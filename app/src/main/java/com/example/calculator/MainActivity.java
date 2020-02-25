@@ -24,11 +24,11 @@ public class MainActivity extends AppCompatActivity {
     private String sHold;
     private String previousOperator;
     private String currentOperator;
+    private String errorMessage;
 
     private int index;
     private int count;
     private int sqrtCount;
-    private int decimalCount;
     private int restartCount;
 
     private BigDecimal lhs;
@@ -56,18 +56,18 @@ public class MainActivity extends AppCompatActivity {
 
         s = "";
         sHold = "";
-        previousOperator = "";
-        currentOperator = "";
+        previousOperator = null;
+        currentOperator = null;
+        errorMessage = null;
 
         index = 0;
         count = 0;
         sqrtCount = 0;
-        decimalCount = 0;
         restartCount = 0;
 
-        lhs = new BigDecimal("0");
-        rhs = new BigDecimal("0");
-        intermediate = new BigDecimal("0");
+        lhs = null;
+        rhs = null;
+        intermediate = null;
 
         output = (TextView) findViewById(R.id.outputView);
         output.setText(String.valueOf(0));
@@ -114,6 +114,9 @@ public class MainActivity extends AppCompatActivity {
                 if( !(rhs.toString()).equals("0") ) {
                     intermediate = lhs.divide(rhs, 3, RoundingMode.CEILING);
                 }
+                else {
+                    errorMessage = "ERROR: Cannot divide by zero";
+                }
                 break;
 
 
@@ -124,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
             case "%":
                 if( !(rhs.toString()).equals("0") ) {
                     intermediate = lhs.remainder(rhs);
+                }
+                else {
+                    errorMessage = "ERROR: Cannot divide by zero";
                 }
                 break;
 
@@ -150,11 +156,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void reset() {
 
-        previousOperator = "";
-        currentOperator = "";
-        rhs = new BigDecimal("0");
-        lhs = new BigDecimal("0");
-        intermediate = new BigDecimal("0");
+        previousOperator = null;
+        currentOperator = null;
+        rhs = null;
+        lhs = null;
+        intermediate = null;
         count = 0;
 
     }
@@ -170,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void clearSqrtString() {
 
-        if( (sqrtCount == 1) && (count == 0) ) {
+        if ( (sqrtCount == 1) && (count == 0) ) {
             s = "";
             sqrtCount = 0;
         }
@@ -178,40 +184,27 @@ public class MainActivity extends AppCompatActivity {
 
     public void addDecimal(String str) {
 
-        if( s.length() == 0 ) {
+        if ( s.length() == 0 ) {
             s += "0.";
         }
 
         else {
 
-            if (previousOperator.isEmpty() && decimalCount == 0) {
+            if ( previousOperator.isEmpty() ) {
 
-                for (int i = 0; i < str.length(); ++i) {
-                    if (str.charAt(i) == '.') {
-                        decimalCount++;
-                    }
-                }
+                if( !s.contains(".") )
+                    s += ".";
 
             }
 
-            else if (!previousOperator.isEmpty() && decimalCount == 0) {
+            else if ( !(previousOperator.isEmpty()) ) {
 
                 int lengthRight = s.length();
                 String right = s.substring(s.indexOf(previousOperator), lengthRight);
-
-                for (int i = 0; i < right.length(); ++i) {
-                    if (right.charAt(i) == '.') {
-                        decimalCount++;
-                    }
-                }
+                if( !right.contains(".") )
+                    s += ".";
 
             }
-
-            if (decimalCount < 1) {
-                s += ".";
-            }
-
-            decimalCount = 0;
 
         }
 
@@ -345,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
                 String opposite = negate(num);
                 rhs = new BigDecimal(opposite);
                 s = s + rhs;
-                currentOperator = "";
+                currentOperator = null;
 
             }
 
@@ -355,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
                 String sqrt = takeSqrt(num);
                 rhs = new BigDecimal(sqrt);
                 s = s + rhs;
-                currentOperator = "";
+                currentOperator = null;
 
             }
 
@@ -365,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
                 String left = s.substring(0, index + 1);
                 String replacement = negate(num);
                 s = left + replacement;
-                currentOperator = "";
+                currentOperator = null;
 
             }
 
@@ -375,10 +368,10 @@ public class MainActivity extends AppCompatActivity {
                 String left = s.substring(0, index + 1);
                 String replacement = takeSqrt(num);
                 s = left + replacement;
-                currentOperator = "";
+                currentOperator = null;
             }
 
-            else if ( ( !currentOperator.equals("=") ) && ( length == specialCaseLength ) ) {
+            else if ( ( !(currentOperator.equals("=")) ) && ( length == specialCaseLength ) ) {
                 rhs = lhs;
             }
 
@@ -418,30 +411,41 @@ public class MainActivity extends AppCompatActivity {
             sHold = "";
         }
 
-        if(  ( ( !lhs.toString().equals("0") ) || ( lhs.toString().equals("0") ) )
-                && ( !(rhs.toString().equals("0")) || ( rhs.toString().equals("0") ) )
-                && (!previousOperator.isEmpty()) && (!currentOperator.isEmpty()) ) {
+        if ( ( !(lhs == null) )  && ( !(rhs == null) ) && ( !(previousOperator == null) ) && ( !(currentOperator == null) ) ) {
 
             calculate();
 
-            switch ( currentOperator ) {
+            if( !(errorMessage == null) ) {
 
-                case "=":
-                    s = intermediate.toString();
-                    output.setText(s);
-                    restartCount = 1;
-                    reset();
-                    break;
+                s = errorMessage;
+                errorMessage = null;
+                output.setText(s);
+                s = "";
+                reset();
 
-                default:
-                    lhs = intermediate;
-                    rhs = new BigDecimal("0");
-                    s = intermediate + currentOperator;
-                    output.setText(s);
-                    previousOperator = currentOperator;
-                    currentOperator = "";
-                    break;
+            }
 
+            else {
+
+                switch (currentOperator) {
+
+                    case "=":
+                        s = intermediate.toString();
+                        output.setText(s);
+                        restartCount = 1;
+                        reset();
+                        break;
+
+                    default:
+                        lhs = intermediate;
+                        rhs = new BigDecimal("0");
+                        s = intermediate + currentOperator;
+                        output.setText(s);
+                        previousOperator = currentOperator;
+                        currentOperator = null;
+                        break;
+
+                }
             }
 
         }
