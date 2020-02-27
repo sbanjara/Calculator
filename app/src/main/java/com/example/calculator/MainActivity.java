@@ -190,14 +190,14 @@ public class MainActivity extends AppCompatActivity {
 
         else {
 
-            if ( previousOperator.isEmpty() ) {
+            if ( previousOperator == null ) {
 
                 if( !s.contains(".") )
                     s += ".";
 
             }
 
-            else if ( !(previousOperator.isEmpty()) ) {
+            else if ( !(previousOperator == null) ) {
 
                 int lengthRight = s.length();
                 String right = s.substring(s.indexOf(previousOperator), lengthRight);
@@ -280,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        if ( (s.length() >= 1) && !(previousOperator.isEmpty()) ) {
+        if ( (s.length() >= 1) && !(previousOperator == null) ) {
 
             index = s.length();
 
@@ -324,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        if ( (s.length() >= 2) && !(currentOperator.isEmpty()) ) {
+        if ( (s.length() >= 2) && !(currentOperator == null) ) {
 
             index = s.indexOf(previousOperator);
             int length = s.length();
